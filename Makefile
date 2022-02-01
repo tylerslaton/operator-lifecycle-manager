@@ -192,9 +192,13 @@ clean:
 	@rm -rf test/e2e/log
 	@rm -rf e2e.namespace
 
-# Copy CRD manifests
+# Copy CRD manifests and generate kuberpak CRDs
+CONTROLLER_GEN := sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.1
+KUBERPAK_CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+
 manifests: vendor
 	./scripts/copy_crds.sh
+	go run $(CONTROLLER_GEN) $(KUBERPAK_CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./pkg/controller/operators/provisioner/api/..." output:crd:artifacts:config=deploy/chart/crds
 
 # Generate deepcopy, conversion, clients, listers, and informers
 codegen:
